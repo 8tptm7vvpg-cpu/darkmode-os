@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060608">
+<title>DARKMODE OS — v0.01</title>
+<style>
+:root{
+  --bg:#060608;
+  --panel:#0d0d12;
+  --panel2:#13131a;
+  --text:#f7f7fb;
+  --muted:#9b9bad;
+  --line:#262631;
+  --purple:#8a2be2;
+  --pink:#ff2fa8;
+  --grad:linear-gradient(135deg,#8a2be2 0%,#b62cff 45%,#ff2fa8 100%);
+  --header-h:68px;
+  --footer-h:64px;
+  --radius:18px;
+  --shadow:0 18px 50px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100%}
+body{overflow-x:hidden}
+button{font:inherit}
+.hidden{display:none!important}
+
+.gradient-text{
+  background:var(--grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.gradient-btn{
+  position:relative;
+  border:1px solid transparent;
+  color:#fff;
+  border-radius:999px;
+  padding:10px 14px;
+  background:
+    linear-gradient(var(--panel2),var(--panel2)) padding-box,
+    var(--grad) border-box;
+  box-shadow:0 0 0 rgba(255,47,168,0);
+  transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  cursor:pointer;
+}
+.gradient-btn.primary{
+  background:var(--grad);
+  border:none;
+  color:#fff;
+  font-weight:800;
+}
+.gradient-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 28px rgba(182,44,255,.22),0 0 20px rgba(255,47,168,.16);
+  filter:saturate(1.12);
+}
+.gradient-btn:active{transform:translateY(0) scale(.98)}
+
+#intro{
+  position:fixed;inset:0;z-index:5000;background:#050507;
+  display:grid;place-items:center;overflow:hidden;
+}
+.intro-fullscreen{
+  position:absolute;right:18px;top:calc(18px + env(safe-area-inset-top));
+}
+.intro-center{
+  width:min(900px,88vw);text-align:center;transform:translateY(-2vh);
+}
+.intro-line{
+  opacity:0;transform:translateY(34px);filter:blur(7px);
+  animation:reveal .82s cubic-bezier(.16,1,.3,1) forwards;
+}
+.intro-darkmode{font-size:clamp(34px,8vw,74px);font-weight:900;letter-spacing:.12em;animation-delay:.18s}
+.intro-os{font-size:clamp(88px,26vw,220px);font-weight:1000;line-height:.82;letter-spacing:-.06em;margin-top:.08em;animation-delay:.56s}
+.intro-divider{
+  height:2px;width:0;margin:28px auto 18px;background:var(--grad);border-radius:3px;
+  box-shadow:0 0 28px rgba(255,47,168,.5);
+  animation:divider 1.05s cubic-bezier(.16,1,.3,1) 1.0s forwards, glow 2.5s ease-in-out 2.05s infinite;
+}
+.intro-domain{font-size:clamp(12px,2.8vw,16px);letter-spacing:.2em;color:#c8c8d3;animation-delay:1.18s}
+.intro-version{
+  position:absolute;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;
+  color:#747482;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+}
+@keyframes reveal{to{opacity:1;transform:none;filter:none}}
+@keyframes divider{to{width:min(560px,74vw)}}
+@keyframes glow{50%{filter:brightness(1.45);box-shadow:0 0 38px rgba(182,44,255,.55)}}
+@keyframes introOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+#intro.exit{animation:introOut .7s ease forwards}
+
+.app{min-height:100vh;padding-top:calc(var(--header-h) + env(safe-area-inset-top));padding-bottom:calc(var(--footer-h) + env(safe-area-inset-bottom))}
+.topbar,.bottombar{
+  position:fixed;left:0;right:0;z-index:1000;
+  background:rgba(6,6,8,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-color:var(--line);
+}
+.topbar{
+  top:0;height:calc(var(--header-h) + env(safe-area-inset-top));
+  padding:env(safe-area-inset-top) 14px 0;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;
+}
+.bottombar{
+  bottom:0;height:calc(var(--footer-h) + env(safe-area-inset-bottom));
+  padding:0 12px env(safe-area-inset-bottom);
+  border-top:1px solid var(--line);
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
+}
+.brand-lockup{font-weight:900;letter-spacing:.08em;white-space:nowrap}
+.brand-lockup .os{font-weight:1000}
+.spacer{flex:1}
+.icon-btn{
+  width:42px;height:42px;border-radius:13px;display:grid;place-items:center;padding:0;
+}
+.icon{width:20px;height:20px;display:block}
+.menu-label{display:none}
+
+main{width:min(1100px,100%);margin:0 auto;padding:22px 16px 40px}
+.hero{
+  padding:22px 0 16px;border-bottom:1px solid var(--line);margin-bottom:18px;
+}
+.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--muted)}
+.hero h1{font-size:clamp(28px,7vw,54px);line-height:.98;margin:10px 0 10px;letter-spacing:-.04em}
+.hero p{color:var(--muted);max-width:760px;line-height:1.6;margin:0}
+.content-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:20px;margin:14px 0;
+}
+.content-card h2{font-size:18px;margin:0 0 12px}
+.content-card h3{font-size:14px;margin:20px 0 8px;color:#fff}
+.content-card p,.content-card li{color:#c9c9d4;line-height:1.65}
+.content-card ul{padding-left:20px}
+.meta-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px
+}
+.meta{
+  border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:14px;padding:12px
+}
+.meta small{display:block;color:#777789;text-transform:uppercase;letter-spacing:.11em;font-size:9px;margin-bottom:5px}
+.meta b{font-size:12px}
+.section{display:none}
+.section.active{display:block;animation:pageIn .28s ease}
+@keyframes pageIn{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.menu-overlay{
+  position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.58);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.menu-overlay.open{opacity:1;pointer-events:auto}
+.drawer{
+  width:min(420px,92vw);height:100%;background:#0a0a0f;border-right:1px solid var(--line);
+  transform:translateX(-100%);transition:transform .32s cubic-bezier(.16,1,.3,1);
+  padding:calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+  overflow:auto;
+}
+.menu-overlay.open .drawer{transform:none}
+.drawer-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.drawer-head h2{font-size:16px;margin:0;flex:1}
+.nav-group{margin:10px 0 18px}
+.nav-parent{
+  font-size:10px;color:#777789;text-transform:uppercase;letter-spacing:.14em;margin:0 10px 8px
+}
+.nav-item{
+  width:100%;text-align:left;background:transparent;color:#d7d7df;border:1px solid transparent;
+  padding:12px 13px;border-radius:12px;cursor:pointer;transition:.18s ease;margin:2px 0;
+}
+.nav-item:hover,.nav-item.active{
+  color:#fff;border-color:#522158;background:linear-gradient(90deg,rgba(138,43,226,.15),rgba(255,47,168,.09))
+}
+.nav-item .code{color:#b78cff;font-weight:800;margin-right:8px}
+.nav-item.disabled{opacity:.42}
+.status-pill{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;
+  color:#aaaabb;font-size:11px
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--grad)}
+.footer-center{text-align:center;font-size:10px;color:#777789;letter-spacing:.1em;text-transform:uppercase}
+.footer-right{text-align:right}
+.footer-left{display:flex;gap:8px}
+.desktop-only{display:none}
+
+.callout{
+  border-left:3px solid transparent;border-image:var(--grad) 1;
+  background:linear-gradient(90deg,rgba(138,43,226,.08),transparent);
+  padding:13px 15px;margin:14px 0;color:#d7d7df;border-radius:0 12px 12px 0
+}
+.next-card{
+  border:1px dashed #69306f;background:linear-gradient(135deg,rgba(138,43,226,.08),rgba(255,47,168,.06));
+}
+.search-wrap{position:relative;margin:0 0 14px}
+.search{
+  width:100%;border:1px solid var(--line);background:#0e0e14;color:#fff;padding:13px 14px;border-radius:14px;outline:none;
+}
+.search:focus{border-color:#9d3fe6;box-shadow:0 0 0 3px rgba(157,63,230,.12)}
+mark{background:rgba(255,47,168,.22);color:#fff;border-radius:3px;padding:0 1px}
+
+@media(min-width:760px){
+  .menu-label{display:inline}
+  .meta-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  main{padding:32px 28px 50px}
+  .content-card{padding:28px}
+  .desktop-only{display:block}
+}
+</style>
+</head>
+<body>
+
+<section id="intro" aria-label="DARKMODE OS cinematic intro">
+  <button class="gradient-btn icon-btn intro-fullscreen" data-fullscreen aria-label="Toggle full screen" title="Full screen">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+  </button>
+  <div class="intro-center">
+    <div class="intro-line intro-darkmode">DARKMODE</div>
+    <div class="intro-line intro-os gradient-text">OS</div>
+    <div class="intro-divider"></div>
+    <div class="intro-line intro-domain">DARKMODEWORKS.COM</div>
+  </div>
+  <div class="intro-version">Version 0.01</div>
+</section>
+
+<div class="app">
+  <header class="topbar">
+    <button id="menuBtn" class="gradient-btn icon-btn" aria-label="Open OS navigation" title="Menu">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="brand-lockup">DARKMODE <span class="os gradient-text">OS</span></div>
+    <div class="spacer"></div>
+    <span class="status-pill desktop-only"><span class="status-dot"></span> Master View</span>
+    <button class="gradient-btn icon-btn" data-fullscreen aria-label="Toggle full screen" title="Full screen">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+    </button>
+  </header>
+
+  <main id="mainContent">
+    <div class="hero">
+      <div class="kicker" id="sectionKicker">DARKMODE OPERATING SYSTEM</div>
+      <h1 id="sectionTitle">OS Overview</h1>
+      <p id="sectionDesc">The visual operating layer for Darkmode standards, governance, administration, playbooks, workflows, assets, and future client systems.</p>
+    </div>
+
+    <section class="section active" data-section="overview">
+      <div class="content-card">
+        <h2>DARKMODE OS</h2>
+        <p>The Darkmode Operating System is the company’s master knowledge and operational architecture. It is designed to capture how Darkmode thinks, creates, operates, reviews work, improves systems, and eventually distributes controlled Playbooks to the people performing the work.</p>
+        <div class="meta-grid">
+          <div class="meta"><small>Version</small><b>0.01</b></div>
+          <div class="meta"><small>Status</small><b>Development</b></div>
+          <div class="meta"><small>Source</small><b>Master Repository</b></div>
+          <div class="meta"><small>Domain</small><b>darkmodeworks.com</b></div>
+        </div>
+      </div>
+      <div class="content-card">
+        <h2>Current Build</h2>
+        <p>Administration is the active build phase. Foundational documents currently loaded into this interface include the OS Index, Master Repository Governance, Company Profile, Mission / Vision / Values, Organizational Structure, and Roles & Responsibilities.</p>
+      </div>
+      <div class="content-card next-card">
+        <h2>Next Object</h2>
+        <p><strong>01F Naming & Numbering Standards</strong></p>
+        <p>This will formally define Drive naming, Darkmode object IDs, versions, lifecycle states, and the conventions that keep the OS predictable as it grows.</p>
+      </div>
+    </section>
+
+    <section class="section" data-section="00A">
+      <div class="content-card">
+        <h2>00A Darkmode OS Index</h2>
+        <p>The master directory for the Darkmode Operating System. It defines the top-level architecture and provides the authoritative map for locating standards, systems, procedures, Playbooks, assets, business records, and institutional knowledge.</p>
+        <div class="callout"><strong>Core principle:</strong> Build in dependency order. Establish the system before filling it with disconnected information.</div>
+        <h3>Master Structure</h3>
+        <p>01A Administration<br>02A Brand<br>03A Legal<br>04A Finance<br>05A Round Table<br>06A SOPs<br>07A Playbooks<br>08A Sales<br>09A Clients<br>10A Marketing<br>11A Portfolio<br>12A Internal Projects<br>13A Assets</p>
+      </div>
+    </section>
+
+    <section class="section" data-section="00B">
+      <div class="content-card">
+        <h2>00B Master Repository Governance</h2>
+        <p>The governance standard for protecting, maintaining, modifying, distributing, recovering, and evolving the Darkmode master repository.</p>
+        <h3>Core Rules</h3>
+        <ul>
+          <li>One authoritative source of truth.</li>
+          <li>The master repository is not a general collaboration environment.</li>
+          <li>Reference master objects rather than duplicating them.</li>
+          <li>Project discoveries do not become standards without review.</li>
+          <li>Playbooks are controlled operational distributions derived from approved master information.</li>
+          <li>Meaningful changes must be traceable, reviewable, versioned, and recoverable.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" data-section="01B">
+      <div class="content-card">
+        <h2>01B Company Profile</h2>
+        <p><strong>Operating Name:</strong> Darkmode</p>
+        <p><strong>Website:</strong> darkmodeworks.com</p>
+        <p><strong>Business Type:</strong> Creative, marketing, technology, and business systems company.</p>
+        <p>Darkmode combines human strategy and creative direction with technology, AI, specialized talent, and repeatable systems to deliver high-quality work without requiring the traditional overhead structure of a large agency.</p>
+        <h3>Operating Model</h3>
+        <p>A lean Core organization supported by the Darkmode Network and external Partners. Darkmode retains ownership of strategy, standards, systems, quality control, client relationships, and project direction.</p>
+      </div>
+    </section>
+
+    <section class="section" data-section="01C">
+      <div class="content-card">
+        <h2>01C Mission, Vision & Values</h2>
+        <h3>Mission</h3>
+        <p><strong>Build Better Systems. Create Better Work. Make Businesses Stronger.</strong></p>
+        <p>Darkmode exists to combine strategy, creativity, technology, specialized talent, and intelligent systems to solve meaningful business problems.</p>
+        <h3>Vision</h3>
+        <p>Build a new kind of creative company: lean, intelligent, adaptable, technology-enabled, and capable of assembling exceptional talent around the problem being solved.</p>
+        <div class="callout"><strong>Long-term objective:</strong> Build a company that knows how to build better companies.</div>
+        <h3>Core Values</h3>
+        <p>Build With Purpose · Think Beyond the Assignment · Systemize What Works · Human Judgment Leads · Quality Is Everyone’s Responsibility · Stay Curious · Challenge the Default · Build the Right Team · Own the Outcome · Leave It Better</p>
+      </div>
+    </section>
+
+    <section class="section" data-section="01D">
+      <div class="content-card">
+        <h2>01D Organizational Structure</h2>
+        <p>Darkmode is designed as a lean core organization supported by a flexible network of specialists assembled according to the requirements of the work.</p>
+        <h3>CORE</h3>
+        <p>Leadership, strategy, client ownership, operational control, quality standards, and stewardship of the Darkmode Operating System.</p>
+        <h3>DARKMODE NETWORK</h3>
+        <p>A trusted community of specialized talent selected because their skills, experience, perspective, or capabilities make them the right people for the work.</p>
+        <h3>PARTNERS</h3>
+        <p>External businesses, vendors, platforms, consultants, and specialized resources used when capabilities are better provided outside the internal Darkmode structure.</p>
+        <h3>Organizational Principle</h3>
+        <p><strong>Role ≠ Person.</strong> One person may perform multiple roles today, allowing responsibilities to transfer later without redesigning the operating system.</p>
+      </div>
+    </section>
+
+    <section class="section" data-section="01E">
+      <div class="content-card">
+        <h2>01E Roles & Responsibilities</h2>
+        <p>Every meaningful responsibility within Darkmode should ultimately have an owner. Roles are defined independently of the individual performing them.</p>
+        <h3>Core Roles</h3>
+        <p>Founder / Operator · Operations · Client Lead · Project Lead · Creative Direction · Strategy · Quality Assurance</p>
+        <h3>Darkmode Network Roles</h3>
+        <p>Graphic Designer · Art Director · Copywriter · Web / UX/UI Designer · Web Developer · Motion Designer / Animator · Video Production · Video Editor · Photographer · Paid Media Specialist · Digital Marketing Specialist · Social Media Specialist · SEO Specialist · Analytics Specialist · AI Production Specialist · Specialized Experts</p>
+        <h3>Role Ownership Standard</h3>
+        <p>Mission · Ownership · Inputs · Outputs · Authority · Dependencies · Escalation · Quality Standard</p>
+        <div class="callout"><strong>Operating philosophy:</strong> Controlled autonomy. If the standards, project requirements, and Playbook answer the question, qualified specialists should be empowered to move.</div>
+      </div>
+    </section>
+
+    <section class="section" data-section="01F">
+      <div class="content-card next-card">
+        <h2>01F Naming & Numbering Standards</h2>
+        <p><strong>Status: NEXT TO BUILD</strong></p>
+        <p>This section will formalize Drive naming conventions, OS object IDs, document numbering, version numbers, lifecycle states, and future dependency/reference conventions.</p>
+        <h3>Drive Convention Already Established</h3>
+        <p>01A Parent<br>01B Child<br>01C Child<br><br>02A Parent<br>02B Child<br>02C Child</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bottombar">
+    <div class="footer-left">
+      <button id="prevBtn" class="gradient-btn icon-btn" aria-label="Previous section" title="Previous">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button id="nextBtn" class="gradient-btn icon-btn" aria-label="Next section" title="Next">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="footer-center">DARKMODE OS · v0.01</div>
+    <div class="footer-right">
+      <button id="homeBtn" class="gradient-btn icon-btn" aria-label="OS home" title="Home">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      </button>
+    </div>
+  </footer>
+</div>
+
+<div id="menuOverlay" class="menu-overlay" aria-hidden="true">
+  <aside class="drawer">
+    <div class="drawer-head">
+      <h2>DARKMODE <span class="gradient-text">OS</span></h2>
+      <button id="closeMenu" class="gradient-btn icon-btn" aria-label="Close menu">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="search-wrap"><input id="menuSearch" class="search" type="search" placeholder="Search OS sections…" autocomplete="off"></div>
+
+    <div class="nav-group">
+      <div class="nav-parent">System</div>
+      <button class="nav-item active" data-go="overview"><span class="code">HOME</span> OS Overview</button>
+      <button class="nav-item" data-go="00A"><span class="code">00A</span> Darkmode OS Index</button>
+      <button class="nav-item" data-go="00B"><span class="code">00B</span> Master Repository Governance</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-parent">01A Administration</div>
+      <button class="nav-item" data-go="01B"><span class="code">01B</span> Company Profile</button>
+      <button class="nav-item" data-go="01C"><span class="code">01C</span> Mission, Vision & Values</button>
+      <button class="nav-item" data-go="01D"><span class="code">01D</span> Organizational Structure</button>
+      <button class="nav-item" data-go="01E"><span class="code">01E</span> Roles & Responsibilities</button>
+      <button class="nav-item" data-go="01F"><span class="code">01F</span> Naming & Numbering Standards <em>— next</em></button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-parent">Future OS Sections</div>
+      <button class="nav-item disabled">02A Brand</button>
+      <button class="nav-item disabled">03A Legal</button>
+      <button class="nav-item disabled">04A Finance</button>
+      <button class="nav-item disabled">05A Round Table</button>
+      <button class="nav-item disabled">06A SOPs</button>
+      <button class="nav-item disabled">07A Playbooks</button>
+      <button class="nav-item disabled">08A Sales</button>
+      <button class="nav-item disabled">09A Clients</button>
+      <button class="nav-item disabled">10A Marketing</button>
+      <button class="nav-item disabled">11A Portfolio</button>
+      <button class="nav-item disabled">12A Internal Projects</button>
+      <button class="nav-item disabled">13A Assets</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+const sectionData = {
+  overview:["DARKMODE OPERATING SYSTEM","OS Overview","The visual operating layer for Darkmode standards, governance, administration, playbooks, workflows, assets, and future client systems."],
+  "00A":["SYSTEM","00A Darkmode OS Index","The authoritative map of the Darkmode Operating System."],
+  "00B":["SYSTEM","00B Master Repository Governance","Rules protecting the master source of truth and controlling how it changes and distributes knowledge."],
+  "01B":["01A ADMINISTRATION","01B Company Profile","Canonical company information used across the Darkmode OS."],
+  "01C":["01A ADMINISTRATION","01C Mission, Vision & Values","The principles that guide how Darkmode thinks, builds, decides, and evolves."],
+  "01D":["01A ADMINISTRATION","01D Organizational Structure","The Core / Darkmode Network / Partners organizational model."],
+  "01E":["01A ADMINISTRATION","01E Roles & Responsibilities","The master role architecture for ownership, authority, handoffs, and controlled autonomy."],
+  "01F":["01A ADMINISTRATION","01F Naming & Numbering Standards","The next Darkmode OS object to build."]
+};
+const order=["overview","00A","00B","01B","01C","01D","01E","01F"];
+let current="overview";
+
+function showSection(id){
+  if(!sectionData[id]) return;
+  current=id;
+  document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.dataset.section===id));
+  document.querySelectorAll(".nav-item[data-go]").forEach(b=>b.classList.toggle("active",b.dataset.go===id));
+  const d=sectionData[id];
+  document.getElementById("sectionKicker").textContent=d[0];
+  document.getElementById("sectionTitle").textContent=d[1];
+  document.getElementById("sectionDesc").textContent=d[2];
+  window.scrollTo({top:0,behavior:"smooth"});
+  closeMenu();
+  history.replaceState(null,"","#"+id);
+}
+function openMenu(){
+  const o=document.getElementById("menuOverlay");
+  o.classList.add("open");o.setAttribute("aria-hidden","false");
+}
+function closeMenu(){
+  const o=document.getElementById("menuOverlay");
+  o.classList.remove("open");o.setAttribute("aria-hidden","true");
+}
+document.getElementById("menuBtn").onclick=openMenu;
+document.getElementById("closeMenu").onclick=closeMenu;
+document.getElementById("menuOverlay").addEventListener("click",e=>{if(e.target.id==="menuOverlay")closeMenu()});
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>showSection(b.dataset.go));
+document.getElementById("homeBtn").onclick=()=>showSection("overview");
+document.getElementById("prevBtn").onclick=()=>{let i=order.indexOf(current);showSection(order[Math.max(0,i-1)])};
+document.getElementById("nextBtn").onclick=()=>{let i=order.indexOf(current);showSection(order[Math.min(order.length-1,i+1)])};
+
+document.querySelectorAll("[data-fullscreen]").forEach(btn=>{
+  btn.onclick=async()=>{
+    try{
+      if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    }catch(e){
+      alert("Full screen may be limited by this browser. On iPhone/iPad, use Add to Home Screen for the most app-like view.");
+    }
+  };
+});
+
+const intro=document.getElementById("intro");
+setTimeout(()=>intro.classList.add("exit"),3400);
+setTimeout(()=>intro.remove(),4200);
+
+const hash=location.hash.replace("#","");
+if(sectionData[hash]) showSection(hash);
+
+document.getElementById("menuSearch").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".nav-item").forEach(item=>{
+    if(item.classList.contains("disabled")) return;
+    item.style.display=!q || item.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+});
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape") closeMenu();
+  if(e.key==="ArrowLeft" && !document.getElementById("menuOverlay").classList.contains("open")) document.getElementById("prevBtn").click();
+  if(e.key==="ArrowRight" && !document.getElementById("menuOverlay").classList.contains("open")) document.getElementById("nextBtn").click();
+});
+</script>
+</body>
+</html>
